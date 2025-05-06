@@ -35,7 +35,6 @@ The bad plot I decided to fix is the Spotify chart presenting numbers of
 artists generating particular amounts of money. I suggested two ways to
 fix that chart, so there will be two possible approaches.
 
-![](images/Obraz1-01.png){width="400"}
 
 ## Creating the dataset
 
