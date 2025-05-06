@@ -5,4 +5,4 @@
 
 **Repository** for Assignment#8
 
-> Contains qmd and html files with code and explanations
+> Contains qmd and html files
