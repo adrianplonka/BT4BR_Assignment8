@@ -1,0 +1,142 @@
+---
+title: "Assignment#8"
+author:
+  name: Adrian Plonka
+  date: 05.06.2025
+format: 
+  html:
+      df-print: paged
+# print df as tables https://quarto.org/docs/computations/r.html#data-frames
+      tidy: false
+      embed-resources: true
+      theme: lumen
+      toc: true
+      toc-location: left
+      toc-depth: 6
+      toc-expand: 6
+      code-tools:
+        source: true
+        toggle: true
+      code-fold: false
+      code-summary: "Show the code"
+      code-overflow: wrap
+      page-layout: full
+editor: visual
+editor_options: 
+  markdown: 
+    wrap: 72
+execute:
+  cache: true
+---
+
+## The "bad" plot
+
+The bad plot I decided to fix is the Spotify chart presenting numbers of
+artists generating particular amounts of money. I suggested two ways to
+fix that chart, so there will be two possible approaches.
+
+![](images/Obraz1-01.png){width="400"}
+
+## Creating the dataset
+
+I created the dataset to work on, from the data visible on the chart.
+Containing year of measurement, artists' income and number of artists
+for each income threshold.
+
+```{r}
+library(tidyverse)
+artist_income <- tibble(
+ income = c('$10K+', '$100K+', '$1M+'),
+ `2017` = c(23400, 4300, 460),
+ `2023` = c(66000, 11600, 1250),
+) %>%
+  pivot_longer(
+    cols = c(`2017`, `2023`),
+    names_to = 'year',
+    values_to = 'num_of_artists'
+) %>%
+  mutate(
+    year = factor(year, levels = c('2017', '2023')),
+    income = factor(income, levels = c('$10K+', '$100K+', "$1OK+", '$1M+'))
+  )
+artist_income
+
+```
+
+## Three separated bar charts
+
+Rather than combining all three charts onto one axis, I create three
+small to ensure the axis and values are correct. Each barplot has its
+own axis to better reflect changes throughout the years.
+
+```{r}
+three_separate_charts <- artist_income %>%
+  ggplot(aes(x = year, y = num_of_artists, fill = year)) +
+  geom_col(width = 0.6) +
+  facet_wrap(~ income, scales = 'free_y') +
+  geom_text(aes(label = scales::comma(num_of_artists)), vjust = -0.5, size = 3) +
+  scale_fill_manual(values = c('2017' = 'aquamarine2', '2023' = 'aquamarine4')) +
+  labs(
+    x = NULL,
+    y = 'Number of Artists',
+    fill = 'Year',
+    title = 'The number of artists generating at least $1M, $100K, 10K',
+    subtitle = 'It has nearly tripled since 2017 till 2023'
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+  legend.position = 'top',
+  axis.line = element_line(color = 'black'),
+  axis.ticks = element_line(color = 'black')
+  )
+three_separate_charts
+```
+
+## Combined bar chart
+
+The second approach is combining all three bar charts into one chart.
+This method is better to show differences between numbers of artists
+having particular incomes rather than the difference between their
+income in 2017 and 2023.
+
+```{r}
+combined_bar_chart <- artist_income %>%
+  ggplot(aes(x = income, y = num_of_artists, fill = year)) +
+  geom_col(position = position_dodge(width = 0.7), width = 0.6) +
+  geom_text(
+    aes(label = scales::comma(num_of_artists)),
+    position = position_dodge(width = 0.7),
+    vjust = -0.5, size = 3.2
+  ) +
+  scale_fill_manual(values = c('2017' = 'aquamarine', '2023' = 'aquamarine3')) +
+  scale_y_continuous(labels = scales::comma, expand = expansion(mult = c(0, 0.25))) +
+  labs(
+    x = 'Income',
+    y = 'Number of Artists',
+    fill = 'Year',
+    title = 'The number of artists generating at least $1M, $100K, 10K',
+    subtitle = 'It has nearly tripled since 2017 till 2023'
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = 'top',
+    axis.line = element_line(color = 'black'),
+    axis.ticks = element_line(color = 'black')
+  )
+combined_bar_chart
+```
+
+## Plotly implementation
+
+-   First chart
+
+    ```{r}
+    library(plotly)
+    ggplotly(three_separate_charts)
+    ```
+
+-   Second chart
+
+    ```{r}
+    ggplotly(combined_bar_chart)
+    ```
